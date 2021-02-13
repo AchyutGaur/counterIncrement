@@ -15,4 +15,16 @@ public class Counter {
 	@Id
 	@Column(name = "counter")
 	int counter;
+	
+	public synchronized int getCounter() {
+		return this.counter;
+	}
+	
+	public synchronized void setCounter(int counter) {
+		this.counter=counter;
+	}
+	
+	public synchronized int increment(Counter count) {
+		return count.getCounter()+1;
+	}
 }

@@ -2,6 +2,8 @@ package com.example.multiple.service;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,18 +20,18 @@ public class CounterService {
 	CounterRepository counterRepository;
 
 	@Async
+	@Transactional
 	public CompletableFuture<Counter> increaseCounter() {
-		Counter newCount = new Counter();
+		Counter newCount;
 		synchronized (lock) {
-			if (counterRepository.count() == 0) {
-				newCount.setCounter(0);
-				counterRepository.save(newCount);
-			} else {
-				Counter count = counterRepository.findFirstByOrderByCounterDesc();
-				newCount.setCounter(count.getCounter() + 1);
-				counterRepository.save(newCount);
-			}
 
+			System.out.println("Thread name " + Thread.currentThread().getName());
+			newCount = new Counter();
+				Counter count = counterRepository.findFirstByOrderByCounterDesc();
+				System.out.println("Counter value: " + count.getCounter());
+				int rowUpdated = counterRepository.updateCounterById(newCount.increment(count), count.getCounter());
+
+				System.out.println("Row updated: " + rowUpdated);
 		}
 		return CompletableFuture.completedFuture(newCount);
 	}
